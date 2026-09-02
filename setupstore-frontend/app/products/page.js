@@ -1,7 +1,7 @@
 "use client";
 export const dynamic = "force-dynamic";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import { useAddToCart } from "../../lib/useAddToCart";
 import { apiRequest } from "../../lib/api";
@@ -30,7 +30,7 @@ import ShoppingCartIcon from "@mui/icons-material/ShoppingCart";
 import FilterListIcon from "@mui/icons-material/FilterList";
 import CloseIcon from "@mui/icons-material/Close";
 
-export default function ProductsPage() {
+function ProductsPageContent() {
   const searchParams = useSearchParams();
 
   const [products, setProducts] = useState([]);
@@ -137,6 +137,7 @@ export default function ProductsPage() {
         <Typography variant="h6" sx={{ fontWeight: 600 }}>
           Filters
         </Typography>
+
         <IconButton
           sx={{ display: { md: "none" } }}
           onClick={() => setMobileOpen(false)}
@@ -428,5 +429,26 @@ export default function ProductsPage() {
         </Snackbar>
       </Box>
     </Container>
+  );
+}
+
+export default function ProductsPage() {
+  return (
+    <Suspense
+      fallback={
+        <Box
+          sx={{
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+            minHeight: "60vh",
+          }}
+        >
+          <CircularProgress />
+        </Box>
+      }
+    >
+      <ProductsPageContent />
+    </Suspense>
   );
 }

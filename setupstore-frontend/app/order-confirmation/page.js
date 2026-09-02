@@ -1,7 +1,7 @@
 "use client";
 export const dynamic = "force-dynamic";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { apiRequest } from "../../lib/api";
@@ -15,11 +15,13 @@ import {
 } from "@mui/material";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 
-export default function OrderConfirmationPage() {
+function OrderConfirmationPageContent() {
   const searchParams = useSearchParams();
   const orderId = searchParams.get("orderId");
+
   const [order, setOrder] = useState(null);
   const [loading, setLoading] = useState(true);
+
   // to fetch the order details when the component mounts
   useEffect(() => {
     async function fetchOrder() {
@@ -69,12 +71,15 @@ export default function OrderConfirmationPage() {
             mb: 2,
           }}
         />
+
         <Typography variant="h4" sx={{ mb: 1 }}>
           Order Confirmed!
         </Typography>
+
         <Typography sx={{ color: "text.secondary", mb: 4 }}>
           Thank you for your purchase. Your order has been placed successfully.
         </Typography>
+
         <Paper sx={{ p: 3, textAlign: "left" }}>
           <Box
             sx={{
@@ -91,6 +96,7 @@ export default function OrderConfirmationPage() {
               STATUS
             </Typography>
           </Box>
+
           <Box
             sx={{
               display: "flex",
@@ -109,7 +115,9 @@ export default function OrderConfirmationPage() {
               {order.status}
             </Typography>
           </Box>
+
           <Divider sx={{ mb: 2 }} />
+
           {order.items.map((item, index) => (
             <Box
               key={item._id || index}
@@ -126,7 +134,9 @@ export default function OrderConfirmationPage() {
               </Typography>
             </Box>
           ))}
+
           <Divider sx={{ my: 2 }} />
+
           <Box
             sx={{
               display: "flex",
@@ -140,6 +150,7 @@ export default function OrderConfirmationPage() {
             </Typography>
           </Box>
         </Paper>
+
         <Box
           sx={{
             display: "flex",
@@ -159,5 +170,26 @@ export default function OrderConfirmationPage() {
         </Box>
       </Box>
     </Box>
+  );
+}
+
+export default function OrderConfirmationPage() {
+  return (
+    <Suspense
+      fallback={
+        <Box
+          sx={{
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+            minHeight: "60vh",
+          }}
+        >
+          <CircularProgress />
+        </Box>
+      }
+    >
+      <OrderConfirmationPageContent />
+    </Suspense>
   );
 }

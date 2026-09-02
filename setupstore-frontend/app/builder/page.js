@@ -1,6 +1,6 @@
 "use client";
 export const dynamic = "force-dynamic";
-import { useState, useEffect } from "react";
+import { useState, useEffect, Suspense } from "react";
 import { apiRequest } from "../../lib/api";
 import { useAuth } from "../../context/AuthContext";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -12,6 +12,7 @@ import {
   Button,
   TextField,
   Alert,
+  CircularProgress,
 } from "@mui/material";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import WarningIcon from "@mui/icons-material/Warning";
@@ -26,7 +27,7 @@ const componentTypes = [
   { key: "case", label: "Case" },
 ];
 
-export default function BuilderPage() {
+function BuilderPageContent() {
   const { user, loading: authLoading } = useAuth();
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -404,5 +405,26 @@ export default function BuilderPage() {
         </Grid>
       </Grid>
     </Box>
+  );
+}
+
+export default function BuilderPage() {
+  return (
+    <Suspense
+      fallback={
+        <Box
+          sx={{
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+            minHeight: "60vh",
+          }}
+        >
+          <CircularProgress />
+        </Box>
+      }
+    >
+      <BuilderPageContent />
+    </Suspense>
   );
 }

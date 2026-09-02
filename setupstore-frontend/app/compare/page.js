@@ -1,6 +1,6 @@
 "use client";
 export const dynamic = "force-dynamic";
-import { useState, useEffect } from "react";
+import { useState, useEffect, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { apiRequest } from "../../lib/api";
 
@@ -33,7 +33,7 @@ import {
 import CloseIcon from "@mui/icons-material/Close";
 import AddIcon from "@mui/icons-material/Add";
 
-export default function ComparePage() {
+function ComparePageContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
 
@@ -338,5 +338,26 @@ export default function ComparePage() {
         </DialogContent>
       </Dialog>
     </Box>
+  );
+}
+
+export default function ComparePage() {
+  return (
+    <Suspense
+      fallback={
+        <Box
+          sx={{
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+            minHeight: "60vh",
+          }}
+        >
+          <CircularProgress />
+        </Box>
+      }
+    >
+      <ComparePageContent />
+    </Suspense>
   );
 }
