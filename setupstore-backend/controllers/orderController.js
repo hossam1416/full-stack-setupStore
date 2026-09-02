@@ -1,0 +1,101 @@
+import Order from "../models/Order.js";
+import Cart from "../models/Cart.js";
+
+// Controller to create a new order from the user's cart, calculate totals, and clear the cart
+const createOrder = async (req, res) => {
+  const { shippingAddress } = req.body;
+
+  if (!shippingAddress) {
+    return res
+      .status(400)
+      .json({ message: "Please provide a shipping address" });
+  }
+
+  // Find user's cart and populate product details to access prices
+  const cart = await Cart.findOne({ user: req.user._id }).populate(
+    "items.product",
+  );
+
+  if (!cart || cart.items.length === 0) {
+    return res.status(400).json({ message: "Your cart is empty" });
+  }
+  // Map cart items to order items format capturing the price at the time of purchase
+  const orderItems = cart.items.map((item) => ({
+    product: item.product._id,
+    quantity: item.quantity,
+    priceAtPurchase: item.product.price,
+  }));
+  // Calculate the total order price based on items and quantities
+  const totalPrice = orderItems.reduce(
+    (sum, item) => sum + item.priceAtPurchase * item.quantity,
+    0,
+  );
+  // Create the new order in the database
+  const order = await Order.create({
+    user: req.user._id,
+    items: orderItems,
+    totalPrice,
+    shippingAddress,
+  });
+
+  // Clear the user's cart after successful order creation
+  cart.items = [];
+  await cart.save();
+
+  res.status(201).json(order);
+};
+
+// Controller to fetch all orders belonging to the authenticated user
+const getOrders = async (req, res) => {
+  const orders = await Order.find({ user: req.user._id }).populate(
+    "items.product",
+  );
+  res.status(200).json(orders);
+};
+// Controller to fetch a single specific order by its ID for the authenticated user, ensuring it belongs to them
+const getOrderById = async (req, res) => {
+  const order = await Order.findOne({
+    _id: req.params.id,
+    user: req.user._id,
+  }).populate("items.product");
+
+  if (!order) {
+    return res.status(404).json({ message: "Order not found" });
+  }
+
+  res.status(200).json(order);
+};
+// Controller for admins to fetch all orders across the entire platform with populated product and user details
+const getAllOrders = async (req, res) => {
+  const orders = await Order.find()
+    .populate("items.product")
+    .populate("user", "username email");
+
+  res.status(200).json(orders);
+};
+const updateOrderStatus = async (req, res) => {
+  const { status } = req.body;
+
+  const validStatuses = ["pending", "shipped", "delivered", "cancelled"];
+  if (!validStatuses.includes(status)) {
+    return res.status(400).json({ message: "Invalid status value" });
+  }
+
+  const order = await Order.findById(req.params.id);
+
+  if (!order) {
+    return res.status(404).json({ message: "Order not found" });
+  }
+
+  order.status = status;
+  await order.save();
+
+  res.status(200).json(order);
+};
+export default {
+  createOrder,
+  getOrders,
+  getOrderById,
+  getAllOrders,
+  updateOrderStatus,
+};
