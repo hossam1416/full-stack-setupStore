@@ -8,7 +8,7 @@ import { TextField, Button, Typography, Alert } from "@mui/material";
 import AuthLayout from "../../components/AuthLayout";
 
 export default function RegisterPage() {
-  const [name, setName] = useState("");
+  const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
@@ -21,7 +21,7 @@ export default function RegisterPage() {
     try {
       await apiRequest("/auth/register", {
         method: "POST",
-        body: JSON.stringify({ name, email, password }),
+        body: JSON.stringify({ username, email, password }),
       });
 
       router.push("/login");
@@ -47,8 +47,8 @@ export default function RegisterPage() {
           label="Full Name"
           type="text"
           fullWidth
-          value={name}
-          onChange={(e) => setName(e.target.value)}
+          value={username}
+          onChange={(e) => setUsername(e.target.value)}
           required
           sx={{ mb: 3 }}
         />

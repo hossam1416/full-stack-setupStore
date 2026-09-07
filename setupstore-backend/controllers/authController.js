@@ -137,6 +137,7 @@ const forgotPassword = async (req, res) => {
     .createHash("sha256")
     .update(resetToken)
     .digest("hex");
+  0;
 
   // Token expires after 15 minutes
   user.resetPasswordToken = hashedToken;
