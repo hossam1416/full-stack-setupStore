@@ -1,7 +1,8 @@
 import express from "express";
-import compareController from "../controllers/compareController.js";
-import authMiddleware from "../middleware/authMiddleware.js";
-const router = express.Router();
+import { compareProducts } from "../controllers/compareController.js";
+import { protect } from "../middleware/authMiddleware.js";
 
-router.get("/", authMiddleware.protect, compareController.compareProducts);
+const router = express.Router();
+router.get("/", protect, compareProducts);
+
 export default router;

@@ -1,4 +1,5 @@
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api";
+
 // Helper function to handle HTTP requests and JSON parsing
 export async function apiRequest(endpoint, options = {}) {
   const token = localStorage.getItem("token");

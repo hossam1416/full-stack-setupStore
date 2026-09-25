@@ -1,7 +1,7 @@
 import Product from "../models/Product.js";
 
 // Controller to compare multiple products by fetching them using an array of IDs from query parameters
-const compareProducts = async (req, res) => {
+export const compareProducts = async (req, res) => {
   const { ids } = req.query;
 
   if (!ids) {
@@ -12,7 +12,7 @@ const compareProducts = async (req, res) => {
   // Split the comma-separated string of IDs into an array
   const idsArray = ids.split(",");
 
-  if (idsArray.length < 1) {
+  if (idsArray.length < 2) {
     return res
       .status(400)
       .json({ message: "Please provide at least two product ids" });
@@ -22,5 +22,3 @@ const compareProducts = async (req, res) => {
 
   res.status(200).json(products);
 };
-
-export default { compareProducts };

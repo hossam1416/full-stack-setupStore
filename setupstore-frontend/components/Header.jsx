@@ -92,6 +92,16 @@ export default function Header() {
     ...(user
       ? [{ label: "Account", href: "/account" }]
       : [{ label: "Login", href: "/login" }]),
+    ...(user?.role === "admin"
+      ? [{ label: "Admin Dashboard", href: "/admin" }]
+      : []),
+  ];
+
+  const desktopNavItems = [
+    ...mainNavItems,
+    ...(user?.role === "admin"
+      ? [{ label: "Admin Dashboard", href: "/admin" }]
+      : []),
   ];
 
   return (
@@ -148,7 +158,7 @@ export default function Header() {
             gap: 3,
           }}
         >
-          {mainNavItems.map((item) => {
+          {desktopNavItems.map((item) => {
             const isActive = pathname === item.href;
 
             return (

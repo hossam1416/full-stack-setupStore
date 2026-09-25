@@ -21,7 +21,7 @@ export function AuthProvider({ children }) {
       }
 
       try {
-        const data = await apiRequest("/auth/me");
+        const data = await apiRequest("/users/me");
         setUser(data);
       } catch (err) {
         // Remove invalid or expired token

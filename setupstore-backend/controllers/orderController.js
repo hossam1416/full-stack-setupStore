@@ -2,7 +2,7 @@ import Order from "../models/Order.js";
 import Cart from "../models/Cart.js";
 
 // Controller to create a new order from the user's cart, calculate totals, and clear the cart
-const createOrder = async (req, res) => {
+export const createOrder = async (req, res) => {
   const { shippingAddress } = req.body;
 
   if (!shippingAddress) {
@@ -46,14 +46,14 @@ const createOrder = async (req, res) => {
 };
 
 // Controller to fetch all orders belonging to the authenticated user
-const getOrders = async (req, res) => {
+export const getOrders = async (req, res) => {
   const orders = await Order.find({ user: req.user._id }).populate(
     "items.product",
   );
   res.status(200).json(orders);
 };
 // Controller to fetch a single specific order by its ID for the authenticated user, ensuring it belongs to them
-const getOrderById = async (req, res) => {
+export const getOrderById = async (req, res) => {
   const order = await Order.findOne({
     _id: req.params.id,
     user: req.user._id,
@@ -66,14 +66,14 @@ const getOrderById = async (req, res) => {
   res.status(200).json(order);
 };
 // Controller for admins to fetch all orders across the entire platform with populated product and user details
-const getAllOrders = async (req, res) => {
+export const getAllOrders = async (req, res) => {
   const orders = await Order.find()
     .populate("items.product")
     .populate("user", "username email");
 
   res.status(200).json(orders);
 };
-const updateOrderStatus = async (req, res) => {
+export const updateOrderStatus = async (req, res) => {
   const { status } = req.body;
 
   const validStatuses = ["pending", "shipped", "delivered", "cancelled"];
@@ -91,11 +91,4 @@ const updateOrderStatus = async (req, res) => {
   await order.save();
 
   res.status(200).json(order);
-};
-export default {
-  createOrder,
-  getOrders,
-  getOrderById,
-  getAllOrders,
-  updateOrderStatus,
 };

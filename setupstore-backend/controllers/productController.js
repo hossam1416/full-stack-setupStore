@@ -15,20 +15,11 @@ async function resolveCategory(categoryInput) {
 }
 
 // Controller to create a new product after validating fields, category, and slug uniqueness
-const createProduct = async (req, res) => {
-  const {
-    name,
-    slug,
-    description,
-    price,
-    category,
-    brand,
-    specs,
-    images,
-    stock,
-  } = req.body;
+export const createProduct = async (req, res) => {
+  const { name, description, price, category, brand, specs, images, stock } =
+    req.body;
 
-  if (!name || !slug || !description || price === undefined || !category) {
+  if (!name || !description || price === undefined || !category) {
     return res
       .status(400)
       .json({ message: "Please provide all required fields" });
@@ -39,16 +30,8 @@ const createProduct = async (req, res) => {
     return res.status(400).json({ message: "Category not found" });
   }
 
-  const slugExists = await Product.findOne({ slug });
-  if (slugExists) {
-    return res
-      .status(400)
-      .json({ message: "Product with this slug already exists" });
-  }
-
   const product = await Product.create({
     name,
-    slug,
     description,
     price,
     category: categoryExists._id,
@@ -63,7 +46,7 @@ const createProduct = async (req, res) => {
 };
 
 // Controller to fetch products with filtering, search, pagination, and population options
-const getProducts = async (req, res) => {
+export const getProducts = async (req, res) => {
   const { search, category, minPrice, maxPrice, page, limit } = req.query;
   const filter = {};
 
@@ -104,7 +87,7 @@ const getProducts = async (req, res) => {
 };
 
 // Controller to fetch a single product by its unique slug
-const getProductBySlug = async (req, res) => {
+export const getProductBySlug = async (req, res) => {
   const product = await Product.findOne({ slug: req.params.slug }).populate(
     "category",
   );
@@ -117,25 +100,14 @@ const getProductBySlug = async (req, res) => {
 };
 
 // Controller to update an existing product by its ID with validation
-const updateProduct = async (req, res) => {
+export const updateProduct = async (req, res) => {
   const product = await Product.findById(req.params.id);
 
   if (!product) {
     return res.status(404).json({ message: "Product not found" });
   }
 
-  // Check if the new slug is already taken by another product
-  if (req.body.slug && req.body.slug !== product.slug) {
-    const slugExists = await Product.findOne({ slug: req.body.slug });
-    if (slugExists) {
-      return res
-        .status(400)
-        .json({ message: "Product with this slug already exists" });
-    }
-  }
-
   product.name = req.body.name || product.name;
-  product.slug = req.body.slug || product.slug;
   product.description = req.body.description || product.description;
   product.price = req.body.price ?? product.price;
 
@@ -159,7 +131,7 @@ const updateProduct = async (req, res) => {
 };
 
 // Controller to delete a product by its ID
-const deleteProduct = async (req, res) => {
+export const deleteProduct = async (req, res) => {
   const product = await Product.findById(req.params.id);
 
   if (!product) {
@@ -169,105 +141,4 @@ const deleteProduct = async (req, res) => {
   await product.deleteOne();
 
   res.status(200).json({ message: "Product deleted successfully" });
-};
-// Controller to bulk import products from a JSON array with validation and category resolution
-const importProducts = async (req, res) => {
-  const { products } = req.body;
-
-  if (!Array.isArray(products) || products.length === 0) {
-    return res
-      .status(400)
-      .json({ message: "Please provide an array of products" });
-  }
-
-  const processedProducts = [];
-
-  for (const item of products) {
-    const {
-      name,
-      slug,
-      description,
-      price,
-      category,
-      brand,
-      specs,
-      images,
-      stock,
-    } = item;
-
-    // Skip items missing required fields
-    if (!name || !slug || !description || price === undefined || !category) {
-      continue;
-    }
-
-    // Check if a product with the same slug already exists in the database
-    const slugExists = await Product.findOne({ slug });
-    if (slugExists) {
-      continue; // Skip duplicates instead of failing the whole request
-    }
-
-    // Resolve category by ID or name; if it doesn't exist, CREATE IT automatically!
-    let categoryDoc = await resolveCategory(category);
-    if (!categoryDoc) {
-      try {
-        const catName = typeof category === "string" ? category : "General";
-        const catSlug = catName
-          .toLowerCase()
-          .replace(/[^a-z0-9]+/g, "-")
-          .replace(/(^-|-$)/g, "");
-
-        // Ensure category slug uniqueness or fallback
-        let existingCatSlug = await Category.findOne({ slug: catSlug });
-        const finalCatSlug = existingCatSlug
-          ? `${catSlug}-${Date.now()}`
-          : catSlug;
-
-        categoryDoc = await Category.create({
-          name: catName,
-          slug: finalCatSlug,
-        });
-      } catch (err) {
-        // If category creation fails, skip this product
-        continue;
-      }
-    }
-
-    processedProducts.push({
-      name,
-      slug,
-      description,
-      price,
-      category: categoryDoc._id,
-      brand,
-      specs,
-      images: images || (item.image ? [item.image] : []),
-      stock: stock ?? 0,
-      status: (stock ?? 0) > 0 ? "In Stock" : "Out of Stock",
-    });
-  }
-
-  if (processedProducts.length === 0) {
-    return res.status(400).json({
-      message:
-        "No valid products to import. Check if slugs are already taken or fields are missing.",
-    });
-  }
-
-  // Insert valid products into the database in bulk
-  const insertedProducts = await Product.insertMany(processedProducts, {
-    ordered: false,
-  });
-
-  res.status(201).json({
-    message: `Successfully imported ${insertedProducts.length} products!`,
-    count: insertedProducts.length,
-  });
-};
-export default {
-  createProduct,
-  getProducts,
-  getProductBySlug,
-  updateProduct,
-  deleteProduct,
-  importProducts,
 };

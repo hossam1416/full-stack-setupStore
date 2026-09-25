@@ -1,15 +1,18 @@
 import express from "express";
-import builderController from "../controllers/builderController.js";
-import authMiddleware from "../middleware/authMiddleware.js";
+
+import {
+  checkCompatibility,
+  createBuild,
+  getBuilds,
+  deleteBuild,
+} from "../controllers/builderController.js";
+import { protect } from "../middleware/authMiddleware.js";
 
 const router = express.Router();
 
-router.post(
-  "/check-compatibility",
-  authMiddleware.protect,
-  builderController.checkCompatibility,
-);
-router.post("/", authMiddleware.protect, builderController.createBuild);
-router.get("/", authMiddleware.protect, builderController.getBuilds);
-router.delete("/:id", authMiddleware.protect, builderController.deleteBuild);
+router.post("/check-compatibility", protect, checkCompatibility);
+router.post("/", protect, createBuild);
+router.get("/", protect, getBuilds);
+router.delete("/:id", protect, deleteBuild);
+
 export default router;

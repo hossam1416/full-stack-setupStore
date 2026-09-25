@@ -22,7 +22,7 @@ import InventoryIcon from "@mui/icons-material/Inventory2";
 import CategoryIcon from "@mui/icons-material/Category";
 import ShoppingCartIcon from "@mui/icons-material/ShoppingCart";
 import MenuIcon from "@mui/icons-material/Menu";
-
+import StorefrontIcon from "@mui/icons-material/Storefront";
 const drawerWidth = 240;
 
 const adminNavItems = [
@@ -112,6 +112,13 @@ export default function AdminLayout({ children }) {
           </ListItemButton>
         ))}
       </List>
+      <ListItemButton component={Link} href="/" onClick={handleMobileClose}>
+        <ListItemIcon>
+          <StorefrontIcon />
+        </ListItemIcon>
+
+        <ListItemText primary="Go to Setup Store" />
+      </ListItemButton>
     </Box>
   );
 

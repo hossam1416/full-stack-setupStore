@@ -2,7 +2,7 @@ import Product from "../models/Product.js";
 import Build from "../models/Build.js";
 
 // Controller to check hardware compatibility between PC components (CPU socket, RAM type, and PSU wattage)
-const checkCompatibility = async (req, res) => {
+export const checkCompatibility = async (req, res) => {
   const { cpuId, motherboardId, ramId, psuId } = req.body;
 
   const productIds = {
@@ -98,7 +98,7 @@ const checkCompatibility = async (req, res) => {
 };
 
 // Controller to create a custom PC build for the authenticated user
-const createBuild = async (req, res) => {
+export const createBuild = async (req, res) => {
   const { name, components } = req.body;
 
   if (!name || !components) {
@@ -122,7 +122,7 @@ const createBuild = async (req, res) => {
 };
 
 // Controller to fetch all PC builds created by the authenticated user, populating all specific hardware component fields
-const getBuilds = async (req, res) => {
+export const getBuilds = async (req, res) => {
   const builds = await Build.find({ user: req.user._id }).populate(
     "components.cpu components.motherboard components.ram components.gpu components.psu components.storage components.case",
   );
@@ -131,7 +131,7 @@ const getBuilds = async (req, res) => {
 };
 
 // Controller to delete a specific PC build by its ID for the authenticated user, ensuring it belongs to them
-const deleteBuild = async (req, res) => {
+export const deleteBuild = async (req, res) => {
   const build = await Build.findOneAndDelete({
     _id: req.params.id,
     user: req.user._id,
@@ -143,5 +143,3 @@ const deleteBuild = async (req, res) => {
 
   res.status(200).json({ message: "Build deleted successfully" });
 };
-
-export default { checkCompatibility, createBuild, getBuilds, deleteBuild };

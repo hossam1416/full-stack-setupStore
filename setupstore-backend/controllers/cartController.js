@@ -2,7 +2,7 @@ import Cart from "../models/Cart.js";
 import Product from "../models/Product.js";
 
 // Controller to add a product to the user's cart or increase its quantity if it already exists
-const addToCart = async (req, res) => {
+export const addToCart = async (req, res) => {
   const { productId, quantity } = req.body;
 
   if (!productId) {
@@ -33,7 +33,7 @@ const addToCart = async (req, res) => {
 };
 
 // Controller to fetch the user's cart and populate product details
-const getCart = async (req, res) => {
+export const getCart = async (req, res) => {
   const cart = await Cart.findOne({ user: req.user._id }).populate(
     "items.product",
   );
@@ -46,7 +46,7 @@ const getCart = async (req, res) => {
 };
 
 // Controller to update the quantity of a specific item in the cart
-const updateCartItem = async (req, res) => {
+export const updateCartItem = async (req, res) => {
   const { productId, quantity } = req.body;
 
   if (!productId || !quantity) {
@@ -75,7 +75,7 @@ const updateCartItem = async (req, res) => {
 };
 
 // Controller to remove a specific product from the cart
-const removeFromCart = async (req, res) => {
+export const removeFromCart = async (req, res) => {
   const { productId } = req.body;
 
   const cart = await Cart.findOne({ user: req.user._id });
@@ -93,5 +93,3 @@ const removeFromCart = async (req, res) => {
 
   res.status(200).json(cart);
 };
-
-export default { addToCart, getCart, updateCartItem, removeFromCart };

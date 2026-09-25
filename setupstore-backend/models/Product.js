@@ -1,5 +1,5 @@
 import mongoose from "mongoose";
-
+import slugify from "slugify";
 const productSchema = new mongoose.Schema(
   {
     name: {
@@ -36,7 +36,7 @@ const productSchema = new mongoose.Schema(
     // Using a flexible Object type to support varying component specifications like CPU sockets
     specs: {
       type: Object,
-      default: {},
+      default: () => ({}),
     },
     images: {
       type: [String],
@@ -57,6 +57,17 @@ const productSchema = new mongoose.Schema(
   },
   { timestamps: true },
 );
+
+productSchema.pre("validate", function (next) {
+  if (this.isModified("name") || !this.slug) {
+    this.slug = slugify(this.name, {
+      lower: true,
+      strict: true,
+    });
+  }
+
+  next();
+});
 
 const Product = mongoose.model("Product", productSchema);
 

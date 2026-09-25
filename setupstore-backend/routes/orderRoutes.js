@@ -1,27 +1,20 @@
 import express from "express";
+import {
+  createOrder,
+  getOrders,
+  getOrderById,
+  getAllOrders,
+  updateOrderStatus,
+} from "../controllers/orderController.js";
 
-import orderController from "../controllers/orderController.js";
-
-import authMiddleware from "../middleware/authMiddleware.js";
+import { protect, adminOnly } from "../middleware/authMiddleware.js";
 
 const router = express.Router();
 
-router.post("/", authMiddleware.protect, orderController.createOrder);
-
-router.get("/", authMiddleware.protect, orderController.getOrders);
-
-router.get(
-  "/admin/all",
-  authMiddleware.protect,
-  authMiddleware.adminOnly,
-  orderController.getAllOrders,
-);
-router.put(
-  "/:id/status",
-  authMiddleware.protect,
-  authMiddleware.adminOnly,
-  orderController.updateOrderStatus,
-);
-router.get("/:id", authMiddleware.protect, orderController.getOrderById);
+router.post("/", protect, createOrder);
+router.get("/", protect, getOrders);
+router.get("/admin/all", protect, adminOnly, getAllOrders);
+router.put("/:id/status", protect, adminOnly, updateOrderStatus);
+router.get("/:id", protect, getOrderById);
 
 export default router;

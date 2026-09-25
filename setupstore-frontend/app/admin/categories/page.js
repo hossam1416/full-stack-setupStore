@@ -9,7 +9,6 @@ import AdminCrudPage from "../../../components/admin/AdminCrudPage";
 
 const emptyForm = {
   name: "",
-  slug: "",
   description: "",
 };
 
@@ -81,7 +80,6 @@ export default function AdminCategoriesPage() {
 
     setForm({
       name: category.name || "",
-      slug: category.slug || "",
       description: category.description || "",
     });
 
@@ -136,14 +134,6 @@ export default function AdminCategoriesPage() {
         value={form.name}
         onChange={(e) => handleFormChange("name", e.target.value)}
         sx={{ mb: 2, mt: 1 }}
-      />
-
-      <TextField
-        label="Slug"
-        fullWidth
-        value={form.slug}
-        onChange={(e) => handleFormChange("slug", e.target.value)}
-        sx={{ mb: 2 }}
       />
 
       <TextField

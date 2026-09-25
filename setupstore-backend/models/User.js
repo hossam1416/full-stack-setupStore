@@ -18,6 +18,7 @@ const userSchema = new mongoose.Schema(
     password: {
       type: String,
       required: true,
+      select: false,
     },
     role: {
       type: String,
@@ -27,10 +28,12 @@ const userSchema = new mongoose.Schema(
     resetPasswordToken: {
       type: String,
       default: null,
+      select: false,
     },
     resetPasswordExpires: {
       type: Date,
       default: null,
+      select: false,
     },
   },
   // Automatically add createdAt and updatedAt timestamps

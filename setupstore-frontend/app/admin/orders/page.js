@@ -108,211 +108,212 @@ export default function AdminOrdersPage() {
       </Box>
     );
   }
-}
-return (
-  <Box sx={{ px: { xs: 2, md: 6 }, py: { xs: 3, md: 6 } }}>
-    <Typography variant="h4" sx={{ mb: 3, fontWeight: "bold" }}>
-      Manage Orders
-    </Typography>
 
-    {errorMsg && (
-      <Alert severity="error" sx={{ mb: 3 }}>
-        {errorMsg}
-      </Alert>
-    )}
+  return (
+    <Box sx={{ px: { xs: 2, md: 6 }, py: { xs: 3, md: 6 } }}>
+      <Typography variant="h4" sx={{ mb: 3, fontWeight: "bold" }}>
+        Manage Orders
+      </Typography>
 
-    <Paper sx={{ mb: 3 }}>
-      <Tabs
-        value={filterStatus}
-        onChange={(e, val) => setFilterStatus(val)}
-        indicatorColor="primary"
-        textColor="primary"
-        variant="scrollable"
-        scrollButtons="auto"
-      >
-        <Tab label="All Orders" value="all" />
-        <Tab label="Pending" value="pending" />
-        <Tab label="Shipped" value="shipped" />
-        <Tab label="Delivered" value="delivered" />
-        <Tab label="Cancelled" value="cancelled" />
-      </Tabs>
-    </Paper>
+      {errorMsg && (
+        <Alert severity="error" sx={{ mb: 3 }}>
+          {errorMsg}
+        </Alert>
+      )}
 
-    <TableContainer component={Paper}>
-      <Table>
-        <TableHead>
-          <TableRow>
-            <TableCell>Order ID</TableCell>
-            <TableCell>Customer</TableCell>
-            <TableCell>Date</TableCell>
-            <TableCell>Total</TableCell>
-            <TableCell>Status</TableCell>
-            <TableCell align="right">Actions</TableCell>
-          </TableRow>
-        </TableHead>
+      <Paper sx={{ mb: 3 }}>
+        <Tabs
+          value={filterStatus}
+          onChange={(e, val) => setFilterStatus(val)}
+          indicatorColor="primary"
+          textColor="primary"
+          variant="scrollable"
+          scrollButtons="auto"
+        >
+          <Tab label="All Orders" value="all" />
+          <Tab label="Pending" value="pending" />
+          <Tab label="Shipped" value="shipped" />
+          <Tab label="Delivered" value="delivered" />
+          <Tab label="Cancelled" value="cancelled" />
+        </Tabs>
+      </Paper>
 
-        <TableBody>
-          {filteredOrders.length === 0 ? (
+      <TableContainer component={Paper}>
+        <Table>
+          <TableHead>
             <TableRow>
-              <TableCell colSpan={6} align="center" sx={{ py: 4 }}>
-                No orders found.
-              </TableCell>
+              <TableCell>Order ID</TableCell>
+              <TableCell>Customer</TableCell>
+              <TableCell>Date</TableCell>
+              <TableCell>Total</TableCell>
+              <TableCell>Status</TableCell>
+              <TableCell align="right">Actions</TableCell>
             </TableRow>
-          ) : (
-            filteredOrders.map((order) => (
-              <TableRow key={order._id}>
-                <TableCell>#{order._id.slice(-6).toUpperCase()}</TableCell>
+          </TableHead>
 
-                <TableCell>{order.user?.username || "—"}</TableCell>
-
-                <TableCell>
-                  {new Date(order.createdAt).toLocaleDateString()}
-                </TableCell>
-
-                <TableCell>${order.totalPrice?.toFixed(2)}</TableCell>
-
-                <TableCell>
-                  <Select
-                    size="small"
-                    value={order.status}
-                    onChange={(e) =>
-                      handleStatusChange(order._id, e.target.value)
-                    }
-                    renderValue={(value) => (
-                      <Chip
-                        label={value}
-                        color={statusColors[value] || "default"}
-                        size="small"
-                        sx={{ textTransform: "capitalize" }}
-                      />
-                    )}
-                  >
-                    {statusOptions.map((status) => (
-                      <MenuItem
-                        key={status}
-                        value={status}
-                        sx={{ textTransform: "capitalize" }}
-                      >
-                        {status}
-                      </MenuItem>
-                    ))}
-                  </Select>
-                </TableCell>
-
-                <TableCell align="right">
-                  <Button
-                    variant="outlined"
-                    size="small"
-                    startIcon={<VisibilityIcon />}
-                    onClick={() => handleOpenDetails(order)}
-                  >
-                    Details
-                  </Button>
+          <TableBody>
+            {filteredOrders.length === 0 ? (
+              <TableRow>
+                <TableCell colSpan={6} align="center" sx={{ py: 4 }}>
+                  No orders found.
                 </TableCell>
               </TableRow>
-            ))
-          )}
-        </TableBody>
-      </Table>
-    </TableContainer>
+            ) : (
+              filteredOrders.map((order) => (
+                <TableRow key={order._id}>
+                  <TableCell>#{order._id.slice(-6).toUpperCase()}</TableCell>
 
-    <Dialog
-      open={openDetailsModal}
-      onClose={() => setOpenDetailsModal(false)}
-      fullWidth
-      maxWidth="sm"
-    >
-      <DialogTitle sx={{ fontWeight: "bold" }}>
-        Order Details #{selectedOrder?._id.slice(-6).toUpperCase()}
-      </DialogTitle>
+                  <TableCell>{order.user?.username || "—"}</TableCell>
 
-      <DialogContent dividers>
-        {selectedOrder && (
-          <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
-            <Box>
-              <Typography variant="subtitle2" color="text.secondary">
-                Customer Info
-              </Typography>
-              <Typography variant="body1">
-                {selectedOrder.user?.username || "N/A"} (
-                {selectedOrder.user?.email || "No email"})
-              </Typography>
-            </Box>
+                  <TableCell>
+                    {new Date(order.createdAt).toLocaleDateString()}
+                  </TableCell>
 
-            <Divider />
+                  <TableCell>${order.totalPrice?.toFixed(2)}</TableCell>
 
-            <Box>
-              <Typography
-                variant="subtitle2"
-                color="text.secondary"
-                sx={{ mb: 1 }}
-              >
-                Shipping Address
-              </Typography>
+                  <TableCell>
+                    <Select
+                      size="small"
+                      value={order.status}
+                      onChange={(e) =>
+                        handleStatusChange(order._id, e.target.value)
+                      }
+                      renderValue={(value) => (
+                        <Chip
+                          label={value}
+                          color={statusColors[value] || "default"}
+                          size="small"
+                          sx={{ textTransform: "capitalize" }}
+                        />
+                      )}
+                    >
+                      {statusOptions.map((status) => (
+                        <MenuItem
+                          key={status}
+                          value={status}
+                          sx={{ textTransform: "capitalize" }}
+                        >
+                          {status}
+                        </MenuItem>
+                      ))}
+                    </Select>
+                  </TableCell>
 
-              <Typography variant="body2" sx={{ whiteSpace: "pre-line" }}>
-                {selectedOrder.shippingAddress || "No address provided"}
-              </Typography>
-            </Box>
+                  <TableCell align="right">
+                    <Button
+                      variant="outlined"
+                      size="small"
+                      startIcon={<VisibilityIcon />}
+                      onClick={() => handleOpenDetails(order)}
+                    >
+                      Details
+                    </Button>
+                  </TableCell>
+                </TableRow>
+              ))
+            )}
+          </TableBody>
+        </Table>
+      </TableContainer>
 
-            <Divider />
+      <Dialog
+        open={openDetailsModal}
+        onClose={() => setOpenDetailsModal(false)}
+        fullWidth
+        maxWidth="sm"
+      >
+        <DialogTitle sx={{ fontWeight: "bold" }}>
+          Order Details #{selectedOrder?._id.slice(-6).toUpperCase()}
+        </DialogTitle>
 
-            <Box>
-              <Typography
-                variant="subtitle2"
-                color="text.secondary"
-                sx={{ mb: 1 }}
-              >
-                Ordered Items
-              </Typography>
+        <DialogContent dividers>
+          {selectedOrder && (
+            <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
+              <Box>
+                <Typography variant="subtitle2" color="text.secondary">
+                  Customer Info
+                </Typography>
+                <Typography variant="body1">
+                  {selectedOrder.user?.username || "N/A"} (
+                  {selectedOrder.user?.email || "No email"})
+                </Typography>
+              </Box>
 
-              {selectedOrder.items?.map((item, idx) => (
-                <Box
-                  key={idx}
-                  sx={{
-                    display: "flex",
-                    justifyContent: "space-between",
-                    alignItems: "center",
-                    mb: 1,
-                    p: 1,
-                    bgcolor: "action.hover",
-                    borderRadius: 1,
-                  }}
+              <Divider />
+
+              <Box>
+                <Typography
+                  variant="subtitle2"
+                  color="text.secondary"
+                  sx={{ mb: 1 }}
                 >
-                  <Typography variant="body2">
-                    {item.product?.name || "Product"} (x{item.quantity})
-                  </Typography>
+                  Shipping Address
+                </Typography>
 
-                  <Typography variant="body2" sx={{ fontWeight: "bold" }}>
-                    ${(item.priceAtPurchase * item.quantity).toFixed(2)}
-                  </Typography>
-                </Box>
-              ))}
-            </Box>
+                <Typography variant="body2" sx={{ whiteSpace: "pre-line" }}>
+                  {selectedOrder.shippingAddress || "No address provided"}
+                </Typography>
+              </Box>
 
-            <Divider />
+              <Divider />
 
-            <Box
-              sx={{ display: "flex", justifyContent: "space-between", mt: 1 }}
-            >
-              <Typography variant="subtitle1" sx={{ fontWeight: "bold" }}>
-                Total Price:
-              </Typography>
+              <Box>
+                <Typography
+                  variant="subtitle2"
+                  color="text.secondary"
+                  sx={{ mb: 1 }}
+                >
+                  Ordered Items
+                </Typography>
 
-              <Typography
-                variant="subtitle1"
-                sx={{ fontWeight: "bold", color: "primary.main" }}
+                {selectedOrder.items?.map((item, idx) => (
+                  <Box
+                    key={idx}
+                    sx={{
+                      display: "flex",
+                      justifyContent: "space-between",
+                      alignItems: "center",
+                      mb: 1,
+                      p: 1,
+                      bgcolor: "action.hover",
+                      borderRadius: 1,
+                    }}
+                  >
+                    <Typography variant="body2">
+                      {item.product?.name || "Product"} (x{item.quantity})
+                    </Typography>
+
+                    <Typography variant="body2" sx={{ fontWeight: "bold" }}>
+                      ${(item.priceAtPurchase * item.quantity).toFixed(2)}
+                    </Typography>
+                  </Box>
+                ))}
+              </Box>
+
+              <Divider />
+
+              <Box
+                sx={{ display: "flex", justifyContent: "space-between", mt: 1 }}
               >
-                ${selectedOrder.totalPrice?.toFixed(2)}
-              </Typography>
-            </Box>
-          </Box>
-        )}
-      </DialogContent>
+                <Typography variant="subtitle1" sx={{ fontWeight: "bold" }}>
+                  Total Price:
+                </Typography>
 
-      <DialogActions>
-        <Button onClick={() => setOpenDetailsModal(false)}>Close</Button>
-      </DialogActions>
-    </Dialog>
-  </Box>
-);
+                <Typography
+                  variant="subtitle1"
+                  sx={{ fontWeight: "bold", color: "primary.main" }}
+                >
+                  ${selectedOrder.totalPrice?.toFixed(2)}
+                </Typography>
+              </Box>
+            </Box>
+          )}
+        </DialogContent>
+
+        <DialogActions>
+          <Button onClick={() => setOpenDetailsModal(false)}>Close</Button>
+        </DialogActions>
+      </Dialog>
+    </Box>
+  );
+}

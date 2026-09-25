@@ -34,7 +34,7 @@ export default function AccountPage() {
     setProfileMessage("");
 
     try {
-      const updated = await apiRequest("/auth/profile", {
+      apiRequest("/users/profile", {
         method: "PUT",
         body: JSON.stringify({ username, email }),
       });

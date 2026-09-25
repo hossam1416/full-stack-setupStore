@@ -13,24 +13,17 @@ import {
   MenuItem,
   IconButton,
   Button,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  CircularProgress,
   Pagination,
   InputAdornment,
 } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
 import CloseIcon from "@mui/icons-material/Close";
-import FileUploadIcon from "@mui/icons-material/FileUpload";
 import SearchIcon from "@mui/icons-material/Search";
 import AdminCrudPage from "../../../components/admin/AdminCrudPage";
 
 const initialForm = {
   _id: "",
   name: "",
-  slug: "",
   images: [""],
   description: "",
   specs: {},
@@ -45,20 +38,14 @@ export default function AdminProductsPage() {
   const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(true);
   const [errorMsg, setErrorMsg] = useState("");
-
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [searchQuery, setSearchQuery] = useState("");
   const limit = 10;
-
   const [openModal, setOpenModal] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [productForm, setProductForm] = useState(initialForm);
   const [formError, setFormError] = useState("");
-
-  const [openImportModal, setOpenImportModal] = useState(false);
-  const [importFile, setImportFile] = useState(null);
-  const [importing, setImporting] = useState(false);
 
   const { user, loading: authLoading } = useAuth();
   const router = useRouter();
@@ -124,7 +111,6 @@ export default function AdminProductsPage() {
     setProductForm({
       _id: product._id,
       name: product.name || "",
-      slug: product.slug || "",
       images: product.images,
       description: product.description || "",
       specs: product.specs || {},
@@ -144,7 +130,6 @@ export default function AdminProductsPage() {
     try {
       const payload = {
         name: productForm.name,
-        slug: productForm.slug,
         images: productForm.images,
         description: productForm.description,
         specs: productForm.specs,
@@ -183,42 +168,6 @@ export default function AdminProductsPage() {
     } catch (err) {
       setErrorMsg(err.message || "Failed to delete product.");
     }
-  }
-
-  async function handleFileUpload() {
-    if (!importFile) return;
-
-    setImporting(true);
-
-    const reader = new FileReader();
-
-    reader.onload = async (event) => {
-      try {
-        const jsonData = JSON.parse(event.target.result);
-
-        await apiRequest("/products/admin/import", {
-          method: "POST",
-          body: JSON.stringify({
-            products: jsonData,
-          }),
-        });
-
-        setOpenImportModal(false);
-        setImportFile(null);
-        fetchData(page, searchQuery);
-
-        alert("Products imported successfully! 🚀");
-      } catch (err) {
-        alert(
-          "Error parsing or importing file: " +
-            (err.message || "Invalid JSON format"),
-        );
-      } finally {
-        setImporting(false);
-      }
-    };
-
-    reader.readAsText(importFile);
   }
 
   const columns = [
@@ -270,14 +219,6 @@ export default function AdminProductsPage() {
         value={productForm.name}
         onChange={(e) => handleFormChange("name", e.target.value)}
       />
-
-      <TextField
-        label="Slug"
-        fullWidth
-        value={productForm.slug}
-        onChange={(e) => handleFormChange("slug", e.target.value)}
-      />
-
       <TextField
         label="Image URL"
         fullWidth
@@ -457,19 +398,6 @@ export default function AdminProductsPage() {
             alignItems: "center",
           }}
         >
-          <Button
-            variant="outlined"
-            size="small"
-            startIcon={<FileUploadIcon />}
-            onClick={() => setOpenImportModal(true)}
-            sx={{
-              borderColor: "warning.main",
-              color: "warning.main",
-            }}
-          >
-            Import JSON
-          </Button>
-
           <TextField
             size="small"
             placeholder="Search by product name..."
@@ -530,53 +458,6 @@ export default function AdminProductsPage() {
           />
         </Box>
       )}
-
-      <Dialog
-        open={openImportModal}
-        onClose={() => setOpenImportModal(false)}
-        maxWidth="xs"
-        fullWidth
-      >
-        <DialogTitle sx={{ fontWeight: "bold" }}>
-          Import Products (JSON)
-        </DialogTitle>
-
-        <DialogContent dividers>
-          <input
-            type="file"
-            accept=".json"
-            onChange={(e) => setImportFile(e.target.files[0])}
-            style={{
-              marginTop: "10px",
-              width: "100%",
-            }}
-          />
-
-          <Typography
-            variant="caption"
-            display="block"
-            sx={{
-              mt: 2,
-              color: "text.secondary",
-            }}
-          >
-            Select a valid JSON file containing an array of product objects
-            matching your schema.
-          </Typography>
-        </DialogContent>
-
-        <DialogActions>
-          <Button onClick={() => setOpenImportModal(false)}>Cancel</Button>
-
-          <Button
-            variant="contained"
-            onClick={handleFileUpload}
-            disabled={!importFile || importing}
-          >
-            {importing ? <CircularProgress size={24} /> : "Upload"}
-          </Button>
-        </DialogActions>
-      </Dialog>
     </Box>
   );
 }
