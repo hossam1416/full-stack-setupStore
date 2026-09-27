@@ -18,7 +18,7 @@ const socialIconStyle = {
   "&:hover": {
     color: "text.primary",
     borderColor: "primary.main",
-    backgroundColor: "rgba(245, 222, 179, 0.08)",
+    backgroundColor: "rgba(251, 191, 36, 0.08)",
   },
 };
 
@@ -48,7 +48,7 @@ export default function Footer() {
           <Grid size={{ xs: 12, md: 4 }}>
             <Typography
               variant="h6"
-              sx={{ color: "#f5deb3", fontWeight: "bold", mb: 2 }}
+              sx={{ color: "primary.main", fontWeight: "bold", mb: 2 }}
             >
               Setup Store
             </Typography>

@@ -20,19 +20,48 @@ const categorySchema = new mongoose.Schema(
       type: String,
       trim: true,
     },
+    specifications: {
+      type: [
+        {
+          name: {
+            type: String,
+            required: true,
+            trim: true,
+          },
+          type: {
+            type: String,
+            required: true,
+            enum: ["text", "number", "select"],
+          },
+          unit: {
+            type: String,
+            default: "",
+            trim: true,
+          },
+          options: {
+            type: [String],
+            default: [],
+          },
+          compare: {
+            type: String,
+            enum: ["higher", "lower", "none"],
+            default: "none",
+          },
+        },
+      ],
+      default: [],
+    },
   },
   { timestamps: true },
 );
 
-categorySchema.pre("validate", function (next) {
+categorySchema.pre("validate", function () {
   if (this.isModified("name") || !this.slug) {
     this.slug = slugify(this.name, {
       lower: true,
       strict: true,
     });
   }
-
-  next();
 });
 
 const Category = mongoose.model("Category", categorySchema);

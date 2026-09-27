@@ -58,15 +58,17 @@ const productSchema = new mongoose.Schema(
   { timestamps: true },
 );
 
-productSchema.pre("validate", function (next) {
+productSchema.pre("validate", function () {
   if (this.isModified("name") || !this.slug) {
     this.slug = slugify(this.name, {
       lower: true,
       strict: true,
     });
   }
+});
 
-  next();
+productSchema.pre("save", function () {
+  this.status = this.stock > 0 ? "In Stock" : "Out of Stock";
 });
 
 const Product = mongoose.model("Product", productSchema);

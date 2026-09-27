@@ -14,6 +14,41 @@ async function resolveCategory(categoryInput) {
   });
 }
 
+function validateProductSpecs(specs, categorySpecifications) {
+  if (!specs || typeof specs !== "object") {
+    return false;
+  }
+
+  for (const specification of categorySpecifications) {
+    const value = specs[specification.name];
+
+    if (value === undefined || value === null || value === "") {
+      continue;
+    }
+
+    if (specification.type === "number" && typeof value !== "number") {
+      return false;
+    }
+
+    if (
+      specification.type === "select" &&
+      !specification.options.includes(value)
+    ) {
+      return false;
+    }
+
+    if (specification.type === "text" && typeof value !== "string") {
+      return false;
+    }
+  }
+
+  const allowedNames = categorySpecifications.map(
+    (specification) => specification.name,
+  );
+
+  return Object.keys(specs).every((name) => allowedNames.includes(name));
+}
+
 // Controller to create a new product after validating fields, category, and slug uniqueness
 export const createProduct = async (req, res) => {
   const { name, description, price, category, brand, specs, images, stock } =
@@ -30,6 +65,14 @@ export const createProduct = async (req, res) => {
     return res.status(400).json({ message: "Category not found" });
   }
 
+  const validSpecs = validateProductSpecs(specs, categoryExists.specifications);
+
+  if (!validSpecs) {
+    return res.status(400).json({
+      message: "Invalid product specifications",
+    });
+  }
+
   const product = await Product.create({
     name,
     description,
@@ -39,7 +82,6 @@ export const createProduct = async (req, res) => {
     specs,
     images,
     stock: stock ?? 0,
-    status: stock > 0 ? "In Stock" : "Out of Stock",
   });
 
   res.status(201).json(product);
@@ -75,7 +117,6 @@ export const getProducts = async (req, res) => {
     .limit(pageLimit)
     // Populate category reference to retrieve full category details instead of just its ID
     .populate("category");
-
   const total = await Product.countDocuments(filter);
 
   res.status(200).json({
@@ -123,8 +164,6 @@ export const updateProduct = async (req, res) => {
   product.specs = req.body.specs || product.specs;
   product.images = req.body.images || product.images;
   product.stock = req.body.stock ?? product.stock;
-  product.status = product.stock > 0 ? "In Stock" : "Out of Stock";
-
   const updatedProduct = await product.save();
 
   res.status(200).json(updatedProduct);

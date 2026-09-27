@@ -1,14 +1,23 @@
 import Category from "../models/Category.js";
-
+import slugify from "slugify";
+import categorySpecifications from "../data/categorySpecifications.js";
 export const createCategory = async (req, res) => {
   const { name, description } = req.body;
 
   if (!name) {
     return res.status(400).json({ message: "Please provide category name" });
   }
+  const slug = slugify(name, {
+    lower: true,
+    strict: true,
+  });
+
+  const specifications = categorySpecifications[slug] || [];
+
   const category = await Category.create({
     name,
     description,
+    specifications,
   });
   res.status(201).json(category);
 };
@@ -29,6 +38,10 @@ export const updateCategory = async (req, res) => {
 
   category.name = req.body.name || category.name;
   category.description = req.body.description || category.description;
+
+  if (req.body.specifications !== undefined) {
+    category.specifications = req.body.specifications;
+  }
 
   const updatedCategory = await category.save();
   res.status(200).json(updatedCategory);

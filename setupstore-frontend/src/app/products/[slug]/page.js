@@ -17,7 +17,6 @@ import {
 import AddIcon from "@mui/icons-material/Add";
 import RemoveIcon from "@mui/icons-material/Remove";
 import ShoppingCartIcon from "@mui/icons-material/ShoppingCart";
-
 export default function ProductDetailPage() {
   const { slug } = useParams();
   const [product, setProduct] = useState(null);
@@ -131,6 +130,7 @@ export default function ProductDetailPage() {
 
             <IconButton
               onClick={() => setQuantity((q) => q + 1)}
+              disabled={quantity >= product.stock}
               sx={{ border: "1px solid", borderColor: "divider" }}
             >
               <AddIcon />
@@ -142,9 +142,11 @@ export default function ProductDetailPage() {
             size="large"
             startIcon={<ShoppingCartIcon />}
             onClick={() => addToCart(product._id, quantity)}
+            disabled={product.stock === 0}
             sx={{ mb: 4, width: { xs: "100%", sm: "auto" } }}
           >
-            Add to Cart
+            {" "}
+            {product.stock === 0 ? "Out of Stock" : "Add to Cart"}
           </Button>
 
           <Divider sx={{ mb: 3 }} />

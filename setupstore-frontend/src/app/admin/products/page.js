@@ -95,6 +95,24 @@ export default function AdminProductsPage() {
     }));
   }
 
+  function handleCategoryChange(categoryName) {
+    const category = categories.find(
+      (cat) => (cat.name || cat) === categoryName,
+    );
+
+    const specs = {};
+
+    category?.specifications?.forEach((specification) => {
+      specs[specification.name] = "";
+    });
+
+    setProductForm((prev) => ({
+      ...prev,
+      category: categoryName,
+      specs,
+    }));
+  }
+
   function handleOpenAdd() {
     setIsEditing(false);
     setProductForm({
@@ -235,93 +253,6 @@ export default function AdminProductsPage() {
         onChange={(e) => handleFormChange("description", e.target.value)}
       />
 
-      <Box
-        sx={{
-          border: "1px solid",
-          borderColor: "divider",
-          p: 2,
-          borderRadius: 2,
-        }}
-      >
-        <Typography variant="subtitle2" sx={{ mb: 2, fontWeight: "bold" }}>
-          Specifications
-        </Typography>
-
-        {Object.entries(productForm.specs || {}).map(([key, value], idx) => (
-          <Box
-            key={idx}
-            sx={{
-              display: "flex",
-              gap: 2,
-              mb: 1.5,
-              alignItems: "center",
-            }}
-          >
-            <TextField
-              label="Key"
-              size="small"
-              value={key}
-              onChange={(e) => {
-                const newKey = e.target.value;
-                const specs = {
-                  ...productForm.specs,
-                };
-
-                const oldVal = specs[key];
-
-                delete specs[key];
-                specs[newKey] = oldVal;
-
-                handleFormChange("specs", specs);
-              }}
-              fullWidth
-            />
-
-            <TextField
-              label="Value"
-              size="small"
-              value={value}
-              onChange={(e) => {
-                handleFormChange("specs", {
-                  ...productForm.specs,
-                  [key]: e.target.value,
-                });
-              }}
-              fullWidth
-            />
-
-            <IconButton
-              color="error"
-              onClick={() => {
-                const specs = {
-                  ...productForm.specs,
-                };
-
-                delete specs[key];
-
-                handleFormChange("specs", specs);
-              }}
-            >
-              <CloseIcon />
-            </IconButton>
-          </Box>
-        ))}
-
-        <Button
-          variant="outlined"
-          size="small"
-          startIcon={<AddIcon />}
-          onClick={() =>
-            handleFormChange("specs", {
-              ...productForm.specs,
-              "": "",
-            })
-          }
-        >
-          Add Spec
-        </Button>
-      </Box>
-
       <Grid container spacing={2}>
         <Grid size={{ xs: 12, sm: 6 }}>
           <TextField
@@ -329,7 +260,7 @@ export default function AdminProductsPage() {
             label="Category"
             fullWidth
             value={productForm.category}
-            onChange={(e) => handleFormChange("category", e.target.value)}
+            onChange={(e) => handleCategoryChange(e.target.value)}
           >
             {categories.map((cat) => (
               <MenuItem key={cat._id || cat} value={cat.name || cat}>
@@ -368,6 +299,52 @@ export default function AdminProductsPage() {
           />
         </Grid>
       </Grid>
+      <Box
+        sx={{
+          border: "1px solid",
+          borderColor: "divider",
+          p: 2,
+          borderRadius: 2,
+          display: "flex",
+          flexDirection: "column",
+          gap: 2,
+        }}
+      >
+        <Typography variant="subtitle2" sx={{ mb: 2, fontWeight: "bold" }}>
+          Specifications
+        </Typography>
+
+        {categories
+          .find((cat) => (cat.name || cat) === productForm.category)
+          ?.specifications?.map((specification) => (
+            <TextField
+              key={specification.name}
+              label={`${specification.name}${
+                specification.unit ? ` (${specification.unit})` : ""
+              }`}
+              fullWidth
+              select={specification.type === "select"}
+              type={specification.type === "number" ? "number" : "text"}
+              value={productForm.specs?.[specification.name] || ""}
+              onChange={(e) =>
+                handleFormChange("specs", {
+                  ...productForm.specs,
+                  [specification.name]:
+                    specification.type === "number"
+                      ? Number(e.target.value)
+                      : e.target.value,
+                })
+              }
+            >
+              {specification.type === "select" &&
+                specification.options?.map((option) => (
+                  <MenuItem key={option} value={option}>
+                    {option}
+                  </MenuItem>
+                ))}
+            </TextField>
+          ))}
+      </Box>
     </Box>
   );
 

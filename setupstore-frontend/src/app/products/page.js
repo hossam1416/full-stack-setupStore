@@ -1,4 +1,5 @@
 "use client";
+
 export const dynamic = "force-dynamic";
 
 import { useState, useEffect, Suspense } from "react";
@@ -18,7 +19,8 @@ import {
   TextField,
   FormGroup,
   FormControlLabel,
-  Checkbox,
+  Radio,
+  RadioGroup,
   Snackbar,
   Alert,
   Pagination,
@@ -33,6 +35,7 @@ import CloseIcon from "@mui/icons-material/Close";
 function ProductsPageContent() {
   const searchParams = useSearchParams();
 
+  // Page state and filter state
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
@@ -49,7 +52,7 @@ function ProductsPageContent() {
 
   const { addToCart, showSuccess, setShowSuccess } = useAddToCart();
 
-  // Sync selected category from URL once categories are loaded (adjust during render)
+  // Sync selected category with URL
   const [categoryUrlSynced, setCategoryUrlSynced] = useState(false);
 
   if (!categoryUrlSynced && categories.length > 0) {
@@ -66,10 +69,11 @@ function ProductsPageContent() {
     setCategoryUrlSynced(true);
   }
 
-  // Reset to page 1 whenever filters change (adjust during render)
+  // Reset pagination when filters change
   const [prevFilterKey, setPrevFilterKey] = useState(
     `${search}|${minPrice}|${maxPrice}|${selectedCategory}`,
   );
+
   const currentFilterKey = `${search}|${minPrice}|${maxPrice}|${selectedCategory}`;
 
   if (currentFilterKey !== prevFilterKey) {
@@ -77,6 +81,7 @@ function ProductsPageContent() {
     setPage(1);
   }
 
+  // Fetch products using the current filters
   useEffect(() => {
     const timer = setTimeout(() => {
       async function fetchProducts() {
@@ -88,7 +93,9 @@ function ProductsPageContent() {
           if (search) params.append("search", search);
           if (minPrice) params.append("minPrice", minPrice);
           if (maxPrice) params.append("maxPrice", maxPrice);
-          if (selectedCategory) params.append("category", selectedCategory);
+          if (selectedCategory) {
+            params.append("category", selectedCategory);
+          }
 
           params.append("page", page);
           params.append("limit", limit);
@@ -111,6 +118,7 @@ function ProductsPageContent() {
     return () => clearTimeout(timer);
   }, [search, minPrice, maxPrice, selectedCategory, page]);
 
+  // Fetch available categories
   useEffect(() => {
     async function fetchCategories() {
       try {
@@ -124,6 +132,7 @@ function ProductsPageContent() {
     fetchCategories();
   }, []);
 
+  // Filter sidebar
   const filterContent = (
     <Box sx={{ width: 280, p: 3, boxSizing: "border-box" }}>
       <Box
@@ -168,37 +177,38 @@ function ProductsPageContent() {
         Category
       </Typography>
 
-      <FormGroup
+      <RadioGroup
+        value={selectedCategory}
+        onChange={(e) => setSelectedCategory(e.target.value)}
         sx={{
           mb: 3,
           maxHeight: 220,
           overflowY: "auto",
           px: 0.5,
-          "&::-webkit-scrollbar": { width: "6px" },
+          "&::-webkit-scrollbar": {
+            width: "6px",
+          },
           "&::-webkit-scrollbar-thumb": {
             backgroundColor: "rgba(255,255,255,0.2)",
             borderRadius: "4px",
           },
         }}
       >
+        <FormControlLabel
+          value=""
+          control={<Radio size="small" />}
+          label="All Categories"
+        />
+
         {categories.map((cat) => (
           <FormControlLabel
             key={cat._id || cat}
-            control={
-              <Checkbox
-                size="small"
-                checked={selectedCategory === (cat._id || cat)}
-                onChange={() =>
-                  setSelectedCategory(
-                    selectedCategory === (cat._id || cat) ? "" : cat._id || cat,
-                  )
-                }
-              />
-            }
+            value={cat._id || cat}
+            control={<Radio size="small" />}
             label={cat.name || cat}
           />
         ))}
-      </FormGroup>
+      </RadioGroup>
 
       <Typography
         variant="subtitle2"
@@ -259,6 +269,7 @@ function ProductsPageContent() {
 
   return (
     <Container maxWidth="xl" sx={{ py: 4 }}>
+      {/* Mobile filter button */}
       <Box sx={{ display: { md: "none" }, mb: 3, px: 1 }}>
         <Button
           variant="outlined"
@@ -270,6 +281,7 @@ function ProductsPageContent() {
         </Button>
       </Box>
 
+      {/* Products layout */}
       <Box
         sx={{
           display: "flex",
@@ -283,6 +295,7 @@ function ProductsPageContent() {
           boxSizing: "border-box",
         }}
       >
+        {/* Desktop filters */}
         <Box
           sx={{
             display: { xs: "none", md: "block" },
@@ -300,6 +313,7 @@ function ProductsPageContent() {
           {filterContent}
         </Box>
 
+        {/* Mobile filters */}
         <Drawer
           anchor="left"
           open={mobileOpen}
@@ -309,6 +323,7 @@ function ProductsPageContent() {
           {filterContent}
         </Drawer>
 
+        {/* Products grid */}
         <Box sx={{ flexGrow: 1, minWidth: 0 }}>
           <Typography variant="h5" sx={{ mb: 3 }}>
             {totalProducts} products found
@@ -404,6 +419,7 @@ function ProductsPageContent() {
                 ))}
               </Grid>
 
+              {/* Pagination */}
               {totalPages > 1 && (
                 <Box sx={{ display: "flex", justifyContent: "center", mt: 6 }}>
                   <Pagination
@@ -418,6 +434,7 @@ function ProductsPageContent() {
           )}
         </Box>
 
+        {/* Add to cart notification */}
         <Snackbar
           open={showSuccess}
           autoHideDuration={3000}

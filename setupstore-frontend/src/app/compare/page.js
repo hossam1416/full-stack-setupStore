@@ -3,22 +3,12 @@ export const dynamic = "force-dynamic";
 import { useState, useEffect, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { apiRequest } from "../../lib/api";
-
 import {
   Box,
   Grid,
   Typography,
   Paper,
   IconButton,
-  TextField,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  List,
-  ListItemButton,
-  ListItemText,
-  ListItemAvatar,
-  Avatar,
   CircularProgress,
   Alert,
   Button,
@@ -36,17 +26,12 @@ import AddIcon from "@mui/icons-material/Add";
 function ComparePageContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
-
   const idsParam = searchParams.get("ids") || "";
   const ids = idsParam ? idsParam.split(",") : [];
 
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [errorMsg, setErrorMsg] = useState("");
-
-  const [dialogOpen, setDialogOpen] = useState(false);
-  const [searchTerm, setSearchTerm] = useState("");
-  const [searchResults, setSearchResults] = useState([]);
 
   useEffect(() => {
     async function fetchCompare() {
@@ -73,27 +58,6 @@ function ComparePageContent() {
     fetchCompare();
   }, [idsParam]);
 
-  useEffect(() => {
-    const timer = setTimeout(async () => {
-      if (!searchTerm.trim()) {
-        setSearchResults([]);
-        return;
-      }
-
-      try {
-        const data = await apiRequest(
-          `/products?search=${encodeURIComponent(searchTerm)}`,
-        );
-
-        setSearchResults(data.products || []);
-      } catch (err) {
-        console.error(err);
-      }
-    }, 400);
-
-    return () => clearTimeout(timer);
-  }, [searchTerm]);
-
   function updateIds(newIds) {
     if (newIds.length === 0) {
       router.push("/compare");
@@ -107,21 +71,34 @@ function ComparePageContent() {
     updateIds(ids.filter((id) => id !== productId));
   }
 
-  function addProduct(productId) {
-    if (ids.includes(productId) || ids.length >= 4) {
-      return;
+  const specifications = products[0]?.category?.specifications || [];
+  console.log("COMPARE DATA:", products);
+  console.log("SPECIFICATIONS:", specifications);
+  function getBestProductIds(specification) {
+    if (specification.compare === "none") {
+      return [];
     }
 
-    updateIds([...ids, productId]);
+    const values = products
+      .map((product) => ({
+        id: product._id,
+        value: product.specs?.[specification.name],
+      }))
+      .filter(({ value }) => typeof value === "number");
 
-    setDialogOpen(false);
-    setSearchTerm("");
-    setSearchResults([]);
+    if (values.length < 2) {
+      return [];
+    }
+
+    const bestValue =
+      specification.compare === "higher"
+        ? Math.max(...values.map(({ value }) => value))
+        : Math.min(...values.map(({ value }) => value));
+
+    return values
+      .filter(({ value }) => value === bestValue)
+      .map(({ id }) => id);
   }
-
-  const specKeys = [
-    ...new Set(products.flatMap((product) => Object.keys(product.specs || {}))),
-  ];
 
   return (
     <Box
@@ -158,7 +135,10 @@ function ComparePageContent() {
             No products selected for comparison.
           </Typography>
 
-          <Button variant="contained" onClick={() => setDialogOpen(true)}>
+          <Button
+            variant="contained"
+            onClick={() => router.push(`/compare/add?ids=${ids.join(",")}`)}
+          >
             Add Product
           </Button>
         </Paper>
@@ -224,7 +204,9 @@ function ComparePageContent() {
             {ids.length < 4 && (
               <Grid size={{ xs: 12, sm: 6, md: 3 }}>
                 <Paper
-                  onClick={() => setDialogOpen(true)}
+                  onClick={() =>
+                    router.push(`/compare/add?ids=${ids.join(",")}`)
+                  }
                   sx={{
                     height: "100%",
                     minHeight: 300,
@@ -254,89 +236,80 @@ function ComparePageContent() {
             )}
           </Grid>
 
-          {products.length >= 1 && (
-            <TableContainer component={Paper} sx={{ mt: 4 }}>
-              <Table>
-                <TableHead>
-                  <TableRow>
-                    <TableCell sx={{ fontWeight: "bold", width: "200px" }}>
-                      Specification
-                    </TableCell>
-                    {products.map((product) => (
-                      <TableCell
-                        key={product._id}
-                        sx={{ fontWeight: "bold", minWidth: "180px" }}
-                      >
-                        {product.name}
+          {products.length >= 1 &&
+            (specifications.length > 0 ? (
+              <TableContainer component={Paper} sx={{ mt: 4 }}>
+                <Table>
+                  <TableHead>
+                    <TableRow>
+                      <TableCell sx={{ fontWeight: "bold", width: "200px" }}>
+                        Specification
                       </TableCell>
-                    ))}
-                  </TableRow>
-                </TableHead>
-                <TableBody>
-                  {specKeys.map((key) => (
-                    <TableRow key={key}>
-                      <TableCell
-                        component="th"
-                        scope="row"
-                        sx={{ color: "text.secondary", fontWeight: 600 }}
-                      >
-                        {key}
-                      </TableCell>
+
                       {products.map((product) => (
-                        <TableCell key={product._id}>
-                          {product.specs?.[key] ?? "N/A"}
+                        <TableCell
+                          key={product._id}
+                          sx={{ fontWeight: "bold", minWidth: "180px" }}
+                        >
+                          {product.name}
                         </TableCell>
                       ))}
                     </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </TableContainer>
-          )}
+                  </TableHead>
+
+                  <TableBody>
+                    {specifications.map((specification) => (
+                      <TableRow
+                        key={specification.name}
+                        sx={{
+                          "&:nth-of-type(odd)": {
+                            backgroundColor: "action.hover",
+                          },
+                        }}
+                      >
+                        <TableCell
+                          component="th"
+                          scope="row"
+                          sx={{ color: "text.secondary", fontWeight: 600 }}
+                        >
+                          {specification.name}
+                        </TableCell>
+
+                        {products.map((product) => {
+                          const bestProductIds =
+                            getBestProductIds(specification);
+                          const isBest = bestProductIds.includes(product._id);
+
+                          return (
+                            <TableCell
+                              key={product._id}
+                              sx={{
+                                fontWeight: isBest ? 700 : 400,
+                                color: isBest ? "success.main" : "inherit",
+                              }}
+                            >
+                              {product.specs?.[specification.name] != null
+                                ? `${product.specs[specification.name]}${
+                                    specification.unit
+                                      ? ` ${specification.unit}`
+                                      : ""
+                                  }`
+                                : "N/A"}
+                            </TableCell>
+                          );
+                        })}
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </TableContainer>
+            ) : (
+              <Alert severity="info" sx={{ mt: 4 }}>
+                This category does not have comparison specifications.
+              </Alert>
+            ))}
         </>
       )}
-
-      <Dialog
-        open={dialogOpen}
-        onClose={() => setDialogOpen(false)}
-        fullWidth
-        maxWidth="sm"
-      >
-        <DialogTitle>Add Product</DialogTitle>
-
-        <DialogContent>
-          <TextField
-            fullWidth
-            autoFocus
-            label="Search products"
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            sx={{ mt: 1, mb: 2 }}
-          />
-
-          <List>
-            {searchResults.map((product) => (
-              <ListItemButton
-                key={product._id}
-                onClick={() => addProduct(product._id)}
-              >
-                <ListItemAvatar>
-                  <Avatar
-                    src={product.images[0]}
-                    alt={product.name}
-                    variant="rounded"
-                  />
-                </ListItemAvatar>
-
-                <ListItemText
-                  primary={product.name}
-                  secondary={`${product.brand || ""} • $${product.price.toFixed(2)}`}
-                />
-              </ListItemButton>
-            ))}
-          </List>
-        </DialogContent>
-      </Dialog>
     </Box>
   );
 }

@@ -12,13 +12,14 @@ export const compareProducts = async (req, res) => {
   // Split the comma-separated string of IDs into an array
   const idsArray = ids.split(",");
 
-  if (idsArray.length < 2) {
+  if (idsArray.length < 1) {
     return res
       .status(400)
       .json({ message: "Please provide at least two product ids" });
   }
   // Find all products whose IDs match the array using the $in operator
-  const products = await Product.find({ _id: { $in: idsArray } });
-
+  const products = await Product.find({
+    _id: { $in: idsArray },
+  }).populate("category");
   res.status(200).json(products);
 };

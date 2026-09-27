@@ -46,6 +46,11 @@ const adminNavItems = [
     href: "/admin/orders",
     icon: <ShoppingCartIcon />,
   },
+  {
+    label: "Go to Setup Store",
+    href: "/",
+    icon: <StorefrontIcon />,
+  },
 ];
 
 export default function AdminLayout({ children }) {
@@ -112,13 +117,6 @@ export default function AdminLayout({ children }) {
           </ListItemButton>
         ))}
       </List>
-      <ListItemButton component={Link} href="/" onClick={handleMobileClose}>
-        <ListItemIcon>
-          <StorefrontIcon />
-        </ListItemIcon>
-
-        <ListItemText primary="Go to Setup Store" />
-      </ListItemButton>
     </Box>
   );
 
