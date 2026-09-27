@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import {
   Alert,
@@ -16,7 +16,7 @@ import {
 
 import { apiRequest } from "../../../lib/api";
 
-export default function CompareAddPage() {
+function CompareAddContent() {
   const router = useRouter();
 
   const searchParams = useSearchParams();
@@ -234,5 +234,19 @@ export default function CompareAddPage() {
         </Paper>
       )}
     </Container>
+  );
+}
+
+export default function CompareAddPage() {
+  return (
+    <Suspense
+      fallback={
+        <Container sx={{ py: 8, textAlign: "center" }}>
+          <CircularProgress />
+        </Container>
+      }
+    >
+      <CompareAddContent />
+    </Suspense>
   );
 }
