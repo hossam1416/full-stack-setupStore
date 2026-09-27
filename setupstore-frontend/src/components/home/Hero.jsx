@@ -6,10 +6,11 @@ import { Box, Button, Container, Typography } from "@mui/material";
 export default function Hero() {
   return (
     <Box
+      component="section"
       sx={{
         position: "relative",
         overflow: "hidden",
-        mb: 10,
+        mb: { xs: 6, md: 10 },
       }}
     >
       <Container maxWidth="xl">
@@ -20,29 +21,39 @@ export default function Hero() {
             alignItems: "center",
             gap: { xs: 4, md: 8 },
             px: { xs: 2, sm: 3, md: 6 },
-            py: { xs: 6, md: 10 },
+            py: { xs: 4, md: 10 },
           }}
         >
-          <Box>
+          <Box
+            sx={{
+              textAlign: { xs: "center", md: "left" },
+              display: "flex",
+              flexDirection: "column",
+              alignItems: { xs: "center", md: "flex-start" },
+            }}
+          >
             <Typography
               variant="h1"
               sx={{
                 fontWeight: 900,
-                fontSize: { xs: "2.5rem", sm: "3.5rem", md: "4.5rem" },
-                lineHeight: 1.05,
-                mb: 3,
+
+                fontSize: { xs: "2.1rem", sm: "3rem", md: "4.5rem" },
+                lineHeight: 1.15,
+                mb: 2.5,
               }}
             >
               Build Your Dream PC with Precision.
             </Typography>
 
             <Typography
-              variant="h6"
+              variant="body1"
               sx={{
                 color: "text.secondary",
                 maxWidth: 650,
-                mb: 4,
-                lineHeight: 1.7,
+
+                fontSize: { xs: "1rem", sm: "1.125rem" },
+                mb: 3.5,
+                lineHeight: 1.6,
               }}
             >
               The ultimate destination for premium components. Use our Smart PC
@@ -55,6 +66,8 @@ export default function Hero() {
                 display: "flex",
                 gap: 2,
                 flexWrap: "wrap",
+                justifyContent: { xs: "center", md: "flex-start" },
+                width: { xs: "100%", sm: "auto" },
               }}
             >
               <Button
@@ -62,6 +75,10 @@ export default function Hero() {
                 href="/products"
                 variant="contained"
                 size="large"
+                sx={{
+                  flex: { xs: 1, sm: "initial" },
+                  minWidth: "140px",
+                }}
               >
                 Shop Now
               </Button>
@@ -71,6 +88,10 @@ export default function Hero() {
                 href="/builder"
                 variant="outlined"
                 size="large"
+                sx={{
+                  flex: { xs: 1, sm: "initial" },
+                  minWidth: "140px",
+                }}
               >
                 Try PC Builder
               </Button>
@@ -83,7 +104,7 @@ export default function Hero() {
             alt="PC setup"
             sx={{
               width: "100%",
-              height: { xs: 280, md: 450 },
+              height: { xs: 240, sm: 320, md: 450 },
               objectFit: "cover",
               borderRadius: 3,
             }}

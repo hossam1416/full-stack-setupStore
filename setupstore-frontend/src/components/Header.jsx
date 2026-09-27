@@ -310,13 +310,11 @@ export default function Header() {
             }}
           >
             <Image
-              src="/logo.png"
+              src="/images/logo.png"
               alt="Setup Store"
-              width={140}
+              width={180}
               height={40}
               style={{
-                width: "auto",
-                height: "40px",
                 objectFit: "contain",
               }}
             />
