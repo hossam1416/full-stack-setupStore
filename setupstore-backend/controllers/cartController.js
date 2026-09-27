@@ -42,6 +42,13 @@ export const getCart = async (req, res) => {
     return res.status(200).json({ user: req.user._id, items: [] });
   }
 
+  const validItems = cart.items.filter((item) => item.product);
+
+  if (validItems.length !== cart.items.length) {
+    cart.items = validItems;
+    await cart.save();
+  }
+
   res.status(200).json(cart);
 };
 

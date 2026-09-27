@@ -3,12 +3,12 @@ import Build from "../models/Build.js";
 
 // Controller to check hardware compatibility between PC components (CPU socket, RAM type, and PSU wattage)
 export const checkCompatibility = async (req, res) => {
-  const { cpuId, motherboardId, ramId, psuId } = req.body;
-
+  const { cpuId, motherboardId, ramId, gpuId, psuId } = req.body;
   const productIds = {
     cpu: cpuId,
     motherboard: motherboardId,
     ram: ramId,
+    gpu: gpuId,
     psu: psuId,
   };
 
@@ -29,11 +29,12 @@ export const checkCompatibility = async (req, res) => {
 
   // Check if CPU socket matches the Motherboard socket
   if (products.cpu && products.motherboard) {
-    const cpuSocket = products.cpu.specs?.socket;
-    const motherboardSocket = products.motherboard.specs?.socket;
+    const cpuSocket = products.cpu.specs?.Socket;
+    const motherboardSocket = products.motherboard.specs?.Socket;
 
     if (cpuSocket && motherboardSocket) {
       const match = cpuSocket === motherboardSocket;
+
       checks.push({
         pair: "CPU & Motherboard",
         compatible: match,
@@ -46,11 +47,12 @@ export const checkCompatibility = async (req, res) => {
 
   // Check if RAM type matches the Motherboard supported memory type
   if (products.ram && products.motherboard) {
-    const ramType = products.ram.specs?.type;
-    const motherboardRamType = products.motherboard.specs?.ramType;
+    const ramType = products.ram.specs?.Type;
+    const motherboardRamType = products.motherboard.specs?.["Memory Type"];
 
     if (ramType && motherboardRamType) {
       const match = ramType === motherboardRamType;
+
       checks.push({
         pair: "RAM & Motherboard",
         compatible: match,
@@ -60,20 +62,19 @@ export const checkCompatibility = async (req, res) => {
       });
     }
   }
-
   // Check if the Power Supply (PSU) wattage is sufficient for the total system power draw
   if (products.psu) {
-    const psuWattage = parseInt(products.psu.specs?.wattage);
+    const psuWattage = parseInt(products.psu.specs?.Wattage);
 
     if (psuWattage && !isNaN(psuWattage)) {
       const componentsWithPower = [
         products.cpu,
         products.motherboard,
         products.ram,
+        products.gpu,
       ].filter(Boolean);
-
       const totalPowerDraw = componentsWithPower.reduce(
-        (sum, item) => sum + (parseInt(item.specs?.powerDraw) || 0),
+        (sum, item) => sum + (parseInt(item.specs?.["Power Consumption"]) || 0),
         0,
       );
 
@@ -88,9 +89,8 @@ export const checkCompatibility = async (req, res) => {
       });
     }
   }
-
-  const overallCompatible = checks.every((check) => check.compatible);
-
+  const overallCompatible =
+    checks.length > 0 && checks.every((check) => check.compatible);
   res.status(200).json({
     overallCompatible,
     checks,

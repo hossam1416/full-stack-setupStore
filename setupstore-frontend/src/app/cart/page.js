@@ -94,7 +94,7 @@ export default function CartPage() {
     );
   }
 
-  if (!cart || !cart.items || cart.items.length === 0) {
+  if (!cart || !cart.items) {
     return (
       <Box sx={{ textAlign: "center", py: 10 }}>
         <Typography variant="h5" sx={{ mb: 2 }}>
@@ -108,7 +108,23 @@ export default function CartPage() {
     );
   }
 
-  const subtotal = cart.items.reduce(
+  const validItems = cart.items.filter((item) => item.product);
+
+  if (validItems.length === 0) {
+    return (
+      <Box sx={{ textAlign: "center", py: 10 }}>
+        <Typography variant="h5" sx={{ mb: 2 }}>
+          Your cart is empty
+        </Typography>
+
+        <Button component={Link} href="/products" variant="contained">
+          Continue Shopping
+        </Button>
+      </Box>
+    );
+  }
+
+  const subtotal = validItems.reduce(
     (sum, item) => sum + item.product.price * item.quantity,
     0,
   );
@@ -126,7 +142,7 @@ export default function CartPage() {
 
       <Grid container spacing={4}>
         <Grid size={{ xs: 12, md: 8 }}>
-          {cart.items.map((item) => (
+          {validItems.map((item) => (
             <Paper
               key={item.product._id}
               sx={{

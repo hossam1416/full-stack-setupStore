@@ -114,6 +114,7 @@ function BuilderPageContent() {
             cpuId: selected.cpu?._id,
             motherboardId: selected.motherboard?._id,
             ramId: selected.ram?._id,
+            gpuId: selected.gpu?._id,
             psuId: selected.psu?._id,
           }),
         });

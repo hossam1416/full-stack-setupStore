@@ -56,7 +56,7 @@ export default function AccountPage() {
     }
 
     try {
-      await apiRequest("/auth/password", {
+      await apiRequest("/users/password", {
         method: "PUT",
         body: JSON.stringify({
           currentPassword,
